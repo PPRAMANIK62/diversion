@@ -136,7 +136,7 @@ const featureCards: FeatureCard[] = [
     icon: <Code className="size-10" />,
     title: "AI File Convertor",
     description: "Convert your code to other languages.",
-    href: "/dashboard/convertor",
+    href: "/dashboard/fileconvert",
     borderColor: "border-violet-500",
   },
   {
