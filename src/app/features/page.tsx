@@ -115,7 +115,7 @@ const featureCards: FeatureCard[] = [
     icon: <Code className="size-10" />,
     title: "Voice To Text Converter",
     description: "Convert your code to other languages.",
-    href: "/dashboard/speech",
+    href: "/dashboard/speeech",
     borderColor: "border-violet-500",
   },
   {
@@ -151,6 +151,20 @@ const featureCards: FeatureCard[] = [
     title: "Text to Speech",
     description: "Convert your code to other languages.",
     href: "/dashboard/text-speech",
+    borderColor: "border-violet-500",
+  },
+  {
+    icon: <Code className="size-10" />,
+    title: "AI Troubleshoot",
+    description: "Convert your code to other languages.",
+    href: "/dashboard/troubleshoot",
+    borderColor: "border-violet-500",
+  },
+  {
+    icon: <Code className="size-10" />,
+    title: "AI Article",
+    description: "Convert your code to other languages.",
+    href: "/dashboard/article",
     borderColor: "border-violet-500",
   },
 ];

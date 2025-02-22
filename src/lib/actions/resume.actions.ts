@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { Education } from "@/lib/models/education.model";
-import { Experience } from "@/lib/models/experience.model";
-import { Resume } from "@/lib/models/resume.model";
-import { Skill } from "@/lib/models/skill.model";
+//import { useUser } from "@clerk/nextjs";
+
 import { connectToDB } from "@/server/db/mongoose";
 import { revalidatePath } from "next/cache";
+import { Experience } from "../models/experience.model";
+import { Resume } from "../models/resume.model";
+import { Skill } from "../models/skill.model";
 
 export async function createResume({
   resumeId,
@@ -67,7 +66,7 @@ export async function fetchUserResumes(userId: string) {
   try {
     await connectToDB();
 
-    const resumes = await Resume.find({ userId });
+    const resumes = await Resume.find({ userId: userId });
 
     return JSON.stringify(resumes);
   } catch (error: any) {
