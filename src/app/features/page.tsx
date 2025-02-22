@@ -147,7 +147,10 @@ const FeaturesPage = () => {
       <div className="h-20 bg-black text-gray-100">
         <Navbar />
       </div>
-      <div className="flex w-full flex-col gap-8 md:p-5">
+      <div
+        className="flex w-full flex-col gap-8 md:p-5"
+        suppressHydrationWarning
+      >
         <Suspense
           fallback={
             <div className="group relative min-h-36 overflow-hidden rounded-lg bg-gradient-to-l from-cyan-300 via-blue-500 to-purple-500 text-white transition-all hover:shadow sm:min-h-52">

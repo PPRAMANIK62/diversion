@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^1.0.5",
-    "@ai-sdk/openai": "^1.0.6",
+    "@ai-sdk/openai": "^1.1.13",
     "@ai-sdk/react": "^0.0.64",
     "@clerk/nextjs": "^6.12.0",
     "@clerk/themes": "^2.1.37",
@@ -60,7 +60,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/react-speech-recognition": "^3.9.6",
     "@uidotdev/usehooks": "^2.4.1",
-    "ai": "^3.4.18",
+    "ai": "^4.1.45",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dom-to-image": "^2.6.0",
