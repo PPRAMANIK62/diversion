@@ -36,6 +36,7 @@ yarn-error.log*
 .env
 .env*.local
 
+
 # vercel
 .vercel
 
@@ -46,3 +47,4 @@ yarn-error.log*
 .idea
 # clerk configuration (can include secrets)
 /.clerk/
+bun.lock
