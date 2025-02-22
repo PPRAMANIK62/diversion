@@ -26,33 +26,29 @@ const words = [
   "Code Bug Detector",
   "Tagline Generator",
 ];
+
 const colors = [
-  "#ff0000",
-  "	#ff0040",
-  "#ff0080",
-  "#ff00bf",
-  "#ff00ff",
-  "#bf00ff",
-  "#8000ff",
-  "#4000ff",
-  "#0000ff",
-  "#0040ff",
-  "#0066ff",
-  "#0080ff",
-  "#00bfff",
-  "#00ffff",
-  "#00ffbf",
-  "#00ff80",
-  "#00ff40",
-  "#00ff00",
-  "#40ff00",
-  "#80ff00",
-  "#bfff00",
-  "#ffff00",
-  "#ffbf00",
-  "#ff8000",
-  "#ff4000",
-  "#ff0000",
+  "#4a90e2", // Soft blue
+  "#5e72e4", // Royal blue
+  "#6c5ce7", // Soft purple
+  "#8854d0", // Medium purple
+  "#3498db", // Light blue
+  "#00b894", // Teal
+  "#20bf6b", // Soft green
+  "#26de81", // Mint green
+  "#2bcbba", // Sea green
+  "#45aaf2", // Sky blue
+  "#4b7bec", // Clear blue
+  "#778ca3", // Steel blue
+  "#9b59b6", // Muted purple
+  "#00cec9", // Robin's egg blue
+  "#48dbfb", // Fresh blue
+  "#0abde3", // Blue grotto
+  "#2d98da", // Medium blue
+  "#45aaf2", // Light blue
+  "#4b7bec", // Royal blue
+  "#5352ed", // Bright blue
+  "#3867d6", // Ocean blue
 ];
 
 const RotatingText = () => {

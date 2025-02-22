@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { deleteResume } from "@/lib/actions/resume.actions";
+import { Loader2, MoreVertical } from "lucide-react";
+import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
-import React, { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,11 +17,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { Loader2, MoreVertical } from "lucide-react";
-import { useRouter } from "next-nprogress-bar";
-import { deleteResume } from "@/lib/actions/resume.actions";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import { useToast } from "../ui/use-toast";
-import { usePathname } from "next/navigation";
 
 const ResumeCard = ({
   resume,
@@ -34,9 +34,9 @@ const ResumeCard = ({
 }) => {
   if (!resume) {
     return (
-      <div className="bg-gray-200 relative aspect-[1/1.2] rounded-lg shadow-lg flex flex-col hover:scale-105 transition-all skeleton">
+      <div className="skeleton relative flex aspect-[1/1.2] flex-col rounded-lg bg-gray-200 shadow-lg transition-all hover:scale-105">
         <div className="flex-1"></div>
-        <div className="border-0 p-3 flex justify-between bg-white/40 rounded-b-lg">
+        <div className="flex justify-between rounded-b-lg border-0 bg-white/40 p-3">
           ‎{" "}
         </div>
       </div>
@@ -77,10 +77,10 @@ const ResumeCard = ({
   };
 
   return (
-    <div className="relative aspect-[1/1.2] flex flex-col hover:scale-105 transition-all">
+    <div className="relative flex aspect-[1/1.2] flex-col transition-all hover:scale-105">
       <Link href={"/resume/" + myResume.resumeId} className="flex-grow">
         <div
-          className="bg-gradient-to-b from-pink-100 via-purple-200 to-blue-200 rounded-t-lg border-t-4 h-full"
+          className="h-full rounded-t-lg border-t-4 bg-gradient-to-b from-pink-100 via-purple-200 to-blue-200"
           style={{
             borderColor: myResume?.themeColor,
           }}
@@ -91,8 +91,8 @@ const ResumeCard = ({
         </div>
       </Link>
 
-      <div className="border p-3 flex justify-between bg-white rounded-b-lg shadow-lg">
-        <h2 className="text-sm font-medium text-slate-700 mr-4 block whitespace-nowrap overflow-hidden text-ellipsis">
+      <div className="flex justify-between rounded-b-lg border bg-white p-3 shadow-lg">
+        <h2 className="mr-4 block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-slate-700">
           {myResume.title}
         </h2>
 
