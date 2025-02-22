@@ -1,57 +1,71 @@
-import Footer from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
-import BlurFade from "@/components/magicui/blur-fade";
-import Perks from "@/components/perks";
-import TypewriterEffectSmoothDemo from "@/components/typewritter";
-import RotatingText from "@/components/ui/RotatingText";
-import { Button } from "@/components/ui/button";
-import { LampContainer } from "@/components/ui/lamp";
-import SparklesText from "@/components/ui/sparklestxt";
-import { TextHoverEffect } from "@/components/ui/text-hover-effect";
-import { SignUpButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import {
-  ArrowRightIcon,
-  InstagramIcon,
-  LinkedinIcon,
-  RocketIcon,
-  TwitterIcon,
-} from "lucide-react";
 import Link from "next/link";
+//import { useState, useEffect } from 'react';
+//import MaxWidthWrapper from "@/components/ui/max-width-wrapper";
+//import AnimationContainer from "@/components/ui/animation-container";
+import Footer from "@/components/Footer";
+import GlowingEffectDemo from "@/components/glowingdemo";
+import CreateButton from "@/components/createbutton";
+//import Testimonial from "@/components/testimonial";
+//import { SectionBadge } from "@/components/ui/badge";
+//import { Particles } from "@/components/particles";
+import TextRevealButton from "@/components/textreavel";
+// import BorderGlowButton from "@/components/glowbutton";
+//import MultiStepLoaderDemo from "@/components/multi-step-loader-demo"
+import { Button } from "@/components/ui/button";
+//import Prism from "@/components/prism";
+//import { RainbowButton } from '@/components/ui/rainbow-button'
+//import Blobby from "@/components/ui/blobby";
+import SparklesText from "@/components/ui/sparklestxt";
+import { ArrowRightIcon } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
+import Reviews from "@/components/testimonial";
+import { TextReveal } from "@/components/infinite";
+
+//import TypewriterEffectSmoothDemo from "@/components/typewritter";
+
+import { SignUpButton } from "@clerk/nextjs";
+// import Header from "@/components/Navbar1";
+import { Navbar } from "@/components/Navbar";
+//import Spline from '@splinetool/react-spline/next';
+//import { Footer } from "@/components/Footer";
+import BlurFade from "@/components/magicui/blur-fade";
+import RotatingText from "@/components/ui/RotatingText";
+//import { LampContainer } from "@/components/ui/lamp";
+import LoaderView from "@/components/loaderconverter";
+import Button69 from "@/components/button69";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import Perks from "@/components/perks";
 
 export default function Home() {
   const { userId } = auth();
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-black pt-20">
+    <div className="min-h-screen bg-black overflow-hidden pt-20 w-full">
       <Navbar />
+      <div className="mx-auto h-12 w-12">
+        <LoaderView />
+      </div>
 
-      <main className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         {/* Decorative elements */}
 
         {/* Hero Section */}
-        <div className="relative py-20 text-center lg:py-32">
-          <RocketIcon className="mx-auto mb-6 h-16 w-16 animate-bounce text-purple-500" />
-          <h1 className="mb-6 bg-gradient-to-r from-pink-600 via-violet-500 to-cyan-300 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl lg:text-6xl">
-            Sky-Rocket Your Carrier with{" "}
+        <div className="text-center py-40 lg:py-40 relative">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mt-15 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-600 via-violet-500 to-cyan-300">
+            Enhance Your Productivity With{" "}
             <span className="text-8xl">
               <SparklesText text="CazzAI" />{" "}
             </span>
           </h1>
 
           <div className="flex justify-center space-x-4">
-            <Button
-              asChild
-              className="transform rounded-full bg-blue-600 px-8 py-3 text-lg text-white transition duration-300 ease-in-out hover:scale-105 hover:bg-blue-700"
-            >
-              <Link href="/generate">Start Creating</Link>
-            </Button>
-            <Button
-              asChild
-              className="rounded-full border border-blue-600 bg-transparent from-pink-700 via-purple-500 to-cyan-300 px-8 py-3 text-lg text-blue-600 transition duration-300 ease-in-out hover:bg-gradient-to-r hover:text-white"
-            >
-              <Link href="#features">Learn More</Link>
-            </Button>
+            <Link href="/features">
+              <CreateButton />
+            </Link>
+
+            <Link href="/dashboard/content">
+              <Button69 />
+            </Link>
           </div>
         </div>
 
@@ -60,7 +74,7 @@ export default function Home() {
           <h1 className="h1 text-center">
             <BlurFade delay={0.1} blur="6px" duration={1} inView>
               <span className="">
-                <span className="inline-bloc mb-12 bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-center text-4xl font-bold text-transparent">
+                <span className="text-4xl font-bold mb-12 text-center text-transparent bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text inline-bloc">
                   Services We Provide In{" "}
                   <span>
                     <SparklesText text="CazzAI" />{" "}
@@ -69,59 +83,23 @@ export default function Home() {
               </span>
             </BlurFade>
           </h1>
-          <div className="align-column-center py-10 text-center">
+          <div className=" py-10 text-center align-column-center">
             <BlurFade delay={0.1} blur="6px" duration={1} inView>
               <RotatingText />
             </BlurFade>
           </div>
 
-          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 py-20 md:grid-cols-3">
-            {[
-              {
-                title: "Twitter Threads",
-                icon: <TwitterIcon className="mb-4 h-10 w-10 text-blue-400" />,
-                description:
-                  "Generate compelling Twitter threads that engage your audience and boost your reach.",
-              },
-              {
-                title: "Instagram Captions",
-                icon: (
-                  <InstagramIcon className="mb-4 h-10 w-10 text-pink-400" />
-                ),
-                description:
-                  "Create catchy captions for your Instagram posts that increase engagement and followers.",
-              },
-              {
-                title: "LinkedIn Posts",
-                icon: <LinkedinIcon className="mb-4 h-10 w-10 text-blue-600" />,
-                description:
-                  "Craft professional content for your LinkedIn network to establish thought leadership.",
-              },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="transform rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-lg transition duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="flex flex-col items-center text-center">
-                  {feature.icon}
-                  <h3 className="mb-3 text-2xl font-semibold text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-300">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <GlowingEffectDemo />
         </div>
 
         {/* Benefits Section */}
         <Perks />
 
         {/* CTA Section */}
-        <div className="relative py-20 text-center">
-          <div className="animate-spin-slow absolute right-10 top-10">
+        <div className="text-center py-20 relative">
+          <div className="absolute top-10 right-10 animate-spin-slow">
             <svg
-              className="h-20 w-20 text-blue-500 opacity-20"
+              className="w-20 h-20 text-blue-500 opacity-20"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -142,13 +120,14 @@ export default function Home() {
               />
             </svg>
           </div>
-          <h2 className="mb-8 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-4xl font-bold text-transparent">
+          <Reviews />
+          <h2 className="text-4xl bg-clip-text text-transparent bg-gradient-to-r from-pink-700 via-purple-500 to-cyan-300 font-bold mb-8 ">
             Want to elevate yourself to one step ahead?
           </h2>
           {userId ? (
             <Button
               asChild
-              className="transform rounded-full bg-blue-600 from-pink-500 via-purple-500 to-indigo-500 px-10 py-4 text-lg text-white transition duration-300 ease-in-out hover:scale-105 hover:bg-gradient-to-r"
+              className="bg-blue-600 hover:bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white px-10 py-4 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105"
             >
               <Link href="/generate">
                 Generate Content Now <ArrowRightIcon className="ml-2 h-5 w-5" />
@@ -156,27 +135,25 @@ export default function Home() {
             </Button>
           ) : (
             <SignUpButton mode="modal">
-              <Button className="transform rounded-full bg-blue-600 px-10 py-4 text-lg text-white transition duration-300 ease-in-out hover:scale-105 hover:bg-blue-700">
-                Get Started Free <ArrowRightIcon className="ml-2 h-5 w-5" />
-              </Button>
+              <TextRevealButton />
             </SignUpButton>
           )}
         </div>
-        <div className="relative mb--20 text-center text-2xl"></div>
+        <div className=" text-2xl text-center relative"></div>
 
         <div>
-          <LampContainer>
-            <div className="relative flex w-full flex-col items-center justify-center text-center">
-              <TypewriterEffectSmoothDemo />
+          <div className="flex flex-col items-center justify-center relative w-full text-center mb-12">
+            <div className="flex items-center justify-center bg-white dark:bg-black">
+              <TextReveal text="Magic UI will change the way you design." />
             </div>
-          </LampContainer>
+          </div>
         </div>
 
-        <div>
+        <div className="mt-10">
           <Footer />
         </div>
 
-        <div className="hidden h-[20rem] items-center justify-center md:flex lg:h-[20rem]">
+        <div className="h-[20rem] lg:h-[20rem] hidden md:flex items-center justify-center">
           <TextHoverEffect text="CAZZAI" />
         </div>
       </main>

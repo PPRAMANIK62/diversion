@@ -88,9 +88,9 @@ export function Navbar() {
               )}
               <SignedOut>
                 <SignInButton mode="modal">
-                  <button className="text-gray-300 hover:text-white transition-colors mt-2 sm:mt-0">
+                  <div className="text-gray-300 hover:text-white transition-colors mt-2 sm:mt-0">
                     <InteractiveHoverButton>Sign In</InteractiveHoverButton>
-                  </button>
+                  </div>
                 </SignInButton>
                 <SignUpButton mode="modal">
                   <button className="">

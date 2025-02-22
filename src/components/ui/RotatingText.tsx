@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import "@/styles/RotatingText.css";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 const words = [
   "LinkedIn Post",
@@ -10,7 +10,7 @@ const words = [
   "AI Form",
   "Twitter Threads",
   "AI Code Writer",
-  "AI Code explainer" ,
+  "AI Code explainer",
   "AI Emailer",
   "AI Resume",
   "Text Improver",
@@ -25,9 +25,35 @@ const words = [
   "Insta Post Generator",
   "Code Bug Detector",
   "Tagline Generator",
-
 ];
-const colors = ["#ff0000", "	#ff0040", "#ff0080", "#ff00bf", "#ff00ff","#bf00ff","#8000ff","#4000ff","#0000ff","#0040ff","#0066ff","#0080ff","#00bfff","#00ffff","#00ffbf","#00ff80","#00ff40","#00ff00","#40ff00","#80ff00","#bfff00","#ffff00","#ffbf00","#ff8000","#ff4000","#ff0000"];
+const colors = [
+  "#ff0000",
+  "	#ff0040",
+  "#ff0080",
+  "#ff00bf",
+  "#ff00ff",
+  "#bf00ff",
+  "#8000ff",
+  "#4000ff",
+  "#0000ff",
+  "#0040ff",
+  "#0066ff",
+  "#0080ff",
+  "#00bfff",
+  "#00ffff",
+  "#00ffbf",
+  "#00ff80",
+  "#00ff40",
+  "#00ff00",
+  "#40ff00",
+  "#80ff00",
+  "#bfff00",
+  "#ffff00",
+  "#ffbf00",
+  "#ff8000",
+  "#ff4000",
+  "#ff0000",
+];
 
 const RotatingText = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -55,7 +81,7 @@ const RotatingText = () => {
     // Update the width when the word changes
     if (textRef.current && containerRef.current) {
       const currentText = words[currentWordIndex];
-      const measuredWidth = measureTextWidth(currentText);
+      const measuredWidth = measureTextWidth(currentText!);
       setContainerWidth(measuredWidth + 40); // Add padding to the width
     }
   }, [currentWordIndex]);
