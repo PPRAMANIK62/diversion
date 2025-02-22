@@ -1,4 +1,4 @@
-import { CustomFiles } from "./types";
+import { type CustomFiles } from "./types";
 
 export function toPrompt(data: { files: CustomFiles[] }) {
   return `
