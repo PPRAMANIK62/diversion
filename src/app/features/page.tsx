@@ -139,6 +139,20 @@ const featureCards: FeatureCard[] = [
     href: "/dashboard/convertor",
     borderColor: "border-violet-500",
   },
+  {
+    icon: <Code className="size-10" />,
+    title: "AI Analyst",
+    description: "Convert your code to other languages.",
+    href: "/dashboard/analyst",
+    borderColor: "border-violet-500",
+  },
+  {
+    icon: <Code className="size-10" />,
+    title: "Text to Speech",
+    description: "Convert your code to other languages.",
+    href: "/dashboard/text-speech",
+    borderColor: "border-violet-500",
+  },
 ];
 
 const FeaturesPage = () => {
