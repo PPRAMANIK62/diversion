@@ -1,57 +1,39 @@
-import Link from "next/link";
-//import { useState, useEffect } from 'react';
-//import MaxWidthWrapper from "@/components/ui/max-width-wrapper";
-//import AnimationContainer from "@/components/ui/animation-container";
 import Footer from "@/components/Footer";
-import GlowingEffectDemo from "@/components/glowingdemo";
-import CreateButton from "@/components/createbutton";
-//import Testimonial from "@/components/testimonial";
-//import { SectionBadge } from "@/components/ui/badge";
-//import { Particles } from "@/components/particles";
-import TextRevealButton from "@/components/textreavel";
-// import BorderGlowButton from "@/components/glowbutton";
-//import MultiStepLoaderDemo from "@/components/multi-step-loader-demo"
-import { Button } from "@/components/ui/button";
-//import Prism from "@/components/prism";
-//import { RainbowButton } from '@/components/ui/rainbow-button'
-//import Blobby from "@/components/ui/blobby";
-import SparklesText from "@/components/ui/sparklestxt";
-import { ArrowRightIcon } from "lucide-react";
-import { auth } from "@clerk/nextjs/server";
-import Reviews from "@/components/testimonial";
-import { TextReveal } from "@/components/infinite";
-
-//import TypewriterEffectSmoothDemo from "@/components/typewritter";
-
-import { SignUpButton } from "@clerk/nextjs";
-// import Header from "@/components/Navbar1";
 import { Navbar } from "@/components/Navbar";
-//import Spline from '@splinetool/react-spline/next';
-//import { Footer } from "@/components/Footer";
-import BlurFade from "@/components/magicui/blur-fade";
-import RotatingText from "@/components/ui/RotatingText";
-//import { LampContainer } from "@/components/ui/lamp";
-import LoaderView from "@/components/loaderconverter";
 import Button69 from "@/components/button69";
-import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import CreateButton from "@/components/createbutton";
+import GlowingEffectDemo from "@/components/glowingdemo";
+import { TextReveal } from "@/components/infinite";
+import LoaderView from "@/components/loaderconverter";
+import BlurFade from "@/components/magicui/blur-fade";
 import Perks from "@/components/perks";
+import Reviews from "@/components/testimonial";
+import TextRevealButton from "@/components/textreavel";
+import RotatingText from "@/components/ui/RotatingText";
+import { Button } from "@/components/ui/button";
+import SparklesText from "@/components/ui/sparklestxt";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import { SignUpButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { ArrowRightIcon } from "lucide-react";
+import Link from "next/link";
 
-export default function Home() {
-  const { userId } = auth();
+export default async function Home() {
+  const { userId } = await auth();
 
   return (
-    <div className="min-h-screen bg-black overflow-hidden pt-20 w-full">
+    <div className="min-h-screen w-full overflow-hidden bg-black pt-20">
       <Navbar />
       <div className="mx-auto h-12 w-12">
         <LoaderView />
       </div>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <main className="container relative mx-auto px-4 sm:px-6 lg:px-8">
         {/* Decorative elements */}
 
         {/* Hero Section */}
-        <div className="text-center py-40 lg:py-40 relative">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mt-15 mb-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-600 via-violet-500 to-cyan-300">
+        <div className="relative py-40 text-center lg:py-40">
+          <h1 className="mt-15 mb-6 bg-gradient-to-r from-pink-600 via-violet-500 to-cyan-300 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl lg:text-6xl">
             Enhance Your Productivity With{" "}
             <span className="text-8xl">
               <SparklesText text="CazzAI" />{" "}
@@ -74,7 +56,7 @@ export default function Home() {
           <h1 className="h1 text-center">
             <BlurFade delay={0.1} blur="6px" duration={1} inView>
               <span className="">
-                <span className="text-4xl font-bold mb-12 text-center text-transparent bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text inline-bloc">
+                <span className="inline-bloc mb-12 bg-gradient-to-r from-violet-500 to-fuchsia-500 bg-clip-text text-center text-4xl font-bold text-transparent">
                   Services We Provide In{" "}
                   <span>
                     <SparklesText text="CazzAI" />{" "}
@@ -83,7 +65,7 @@ export default function Home() {
               </span>
             </BlurFade>
           </h1>
-          <div className=" py-10 text-center align-column-center">
+          <div className="align-column-center py-10 text-center">
             <BlurFade delay={0.1} blur="6px" duration={1} inView>
               <RotatingText />
             </BlurFade>
@@ -96,10 +78,10 @@ export default function Home() {
         <Perks />
 
         {/* CTA Section */}
-        <div className="text-center py-20 relative">
-          <div className="absolute top-10 right-10 animate-spin-slow">
+        <div className="relative py-20 text-center">
+          <div className="animate-spin-slow absolute right-10 top-10">
             <svg
-              className="w-20 h-20 text-blue-500 opacity-20"
+              className="h-20 w-20 text-blue-500 opacity-20"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -121,13 +103,13 @@ export default function Home() {
             </svg>
           </div>
           <Reviews />
-          <h2 className="text-4xl bg-clip-text text-transparent bg-gradient-to-r from-pink-700 via-purple-500 to-cyan-300 font-bold mb-8 ">
+          <h2 className="mb-8 bg-gradient-to-r from-pink-700 via-purple-500 to-cyan-300 bg-clip-text text-4xl font-bold text-transparent">
             Want to elevate yourself to one step ahead?
           </h2>
           {userId ? (
             <Button
               asChild
-              className="bg-blue-600 hover:bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white px-10 py-4 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105"
+              className="transform rounded-full bg-blue-600 from-pink-500 via-purple-500 to-indigo-500 px-10 py-4 text-lg text-white transition duration-300 ease-in-out hover:scale-105 hover:bg-gradient-to-r"
             >
               <Link href="/generate">
                 Generate Content Now <ArrowRightIcon className="ml-2 h-5 w-5" />
@@ -139,10 +121,10 @@ export default function Home() {
             </SignUpButton>
           )}
         </div>
-        <div className=" text-2xl text-center relative"></div>
+        <div className="relative text-center text-2xl"></div>
 
         <div>
-          <div className="flex flex-col items-center justify-center relative w-full text-center mb-12">
+          <div className="relative mb-12 flex w-full flex-col items-center justify-center text-center">
             <div className="flex items-center justify-center bg-white dark:bg-black">
               <TextReveal text="Magic UI will change the way you design." />
             </div>
@@ -153,7 +135,7 @@ export default function Home() {
           <Footer />
         </div>
 
-        <div className="h-[20rem] lg:h-[20rem] hidden md:flex items-center justify-center">
+        <div className="hidden h-[20rem] items-center justify-center md:flex lg:h-[20rem]">
           <TextHoverEffect text="CAZZAI" />
         </div>
       </main>
