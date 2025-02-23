@@ -1,21 +1,7 @@
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
- * for Docker builds.
- */
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  webpack: (config) => {
-    // Ignore node-specific modules when bundling for the browser
-    // https://webpack.js.org/configuration/resolve/#resolvealias
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      sharp$: false,
-      "onnxruntime-node$": false,
-    };
-    return config;
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -27,12 +13,8 @@ const config = {
     MAILTRAP_API_TOKEN: process.env.MAILTRAP_API_TOKEN,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "*",
-      },
-    ],
+    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    minimumCacheTTL: 60,
   },
   reactStrictMode: true,
 };

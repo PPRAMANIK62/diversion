@@ -1,28 +1,25 @@
 "use client";
-import React, { useState } from "react";
 import { Cover } from "@/components/ui/cover";
-import { useRef } from "react"
-import TextCursorProximity from "@/components/textcursor"
-
+import { useState } from "react";
 
 import { Navbar } from "@/components/Navbar";
 import SearchSection from "@/components/content/SearchSection";
 import TemplateListSection from "@/components/content/TemplateListSection";
 
 function Dashboard() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
   const [userSearchInput, setUserSearchInput] = useState<string>();
   return (
-    <div >
-      <div className="bg-black text-gray-100 h-20">
+    <div>
+      <div className="h-20 bg-black text-gray-100">
         <Navbar />
       </div>
       <div className="">
-        <h1 className="md:text-6xl text-2xl text-center md:mt-12 font-bold">
+        <h1 className="text-center text-2xl font-bold md:mt-12 md:text-6xl">
           Create All Types of Content <br /> With{" "}
           <Cover>
-            <span className=" bg-clip-text text-transparent bg-gradient-to-r from-pink-600 via-violet-500 to-cyan-300">Lightning Speed</span>
+            <span className="bg-gradient-to-r from-pink-600 via-violet-500 to-cyan-300 bg-clip-text text-transparent">
+              Lightning Speed
+            </span>
           </Cover>
         </h1>
       </div>
@@ -32,7 +29,7 @@ function Dashboard() {
       />
 
       {/* Template List Section  */}
-      <TemplateListSection userSearchInput={userSearchInput} />
+      <TemplateListSection userSearchInput={userSearchInput!} />
     </div>
   );
 }

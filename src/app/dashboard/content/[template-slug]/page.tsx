@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import Templates from "@/app/(data)/Templates";
 import { type TEMPLATE } from "@/components/content/TemplateListSection";
 import { Button } from "@/components/ui/button";
+import { chatSession } from "@/lib/gemini-model";
+import { useUser } from "@clerk/nextjs";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import FormSection from "../_components/FormSection";
 import OutputSection from "../_components/OutputSection";
-//import { useRouter } from 'next/navigation'
-import { chatSession } from "@/lib/gemini-model";
-import { useUser } from "@clerk/nextjs";
-//import ts from 'typescript'
 import { SaveInDb } from "./actions";
 
 interface PROPS {

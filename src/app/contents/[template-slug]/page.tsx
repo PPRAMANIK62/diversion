@@ -1,85 +1,74 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, {  useState } from "react";
+
+import { saveGeneratedContent } from "@/actions/content";
+import Templates from "@/app/(data)/Templates";
 import FormSection from "@/app/dashboard/content/_components/FormSection";
 import OutputSection from "@/app/dashboard/content/_components/OutputSection";
-import { TEMPLATE } from "@/components/content/TemplateListSection";
-import Templates from "@/app/(data)/Templates";
 import { Button } from "@/components/ui/button";
+import { chatSession } from "@/lib/gemini-model";
+import { useUser } from "@clerk/nextjs";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { chatSession } from "@/utils/db/gemini-model";
-import { db } from "@/utils/db/dbConfig";
-import { AIOutput } from "@/utils/db/schema";
-import moment from "moment";
-import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
-//import ts from 'typescript'
+import { useState } from "react";
+import { toast } from "sonner";
 
-interface PROPS {
+interface Props {
   params: {
     "template-slug": string;
   };
 }
 
-function CreateNewContent(props: PROPS) {
-  //@ts-ignore
-  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug == props.params["template-slug"],
+type FormData = Record<string, string>;
+
+function CreateNewContent({ params }: Props) {
+  const selectedTemplate = Templates?.find(
+    (item) => item.slug === params["template-slug"],
   );
   const [loading, setLoading] = useState(false);
-  const [aiOutput, setAiOutput] = useState<string>("");
+  const [aiOutput, setAiOutput] = useState("");
   const { user } = useUser();
-  //const router=useRouter();
-  /**
-   * Used to generate content from AI
-   * @param formData
-   * @returns
-   */
-  const GenerateAIContent = async (formData: any) => {
-    setLoading(true);
-    const SelectedPrompt = selectedTemplate?.aiPrompt;
-    const FinalAIPrompt = JSON.stringify(formData) + ", " + SelectedPrompt;
-    const result = await chatSession.sendMessage(FinalAIPrompt);
 
-    setAiOutput(result?.response.text());
-    await SaveInDb(
-      JSON.stringify(formData),
-      selectedTemplate?.slug,
-      result?.response.text(),
-    );
-    setLoading(false);
-  };
+  const generateAIContent = async (formData: FormData) => {
+    try {
+      setLoading(true);
+      const selectedPrompt = selectedTemplate?.aiPrompt;
+      const finalAIPrompt = JSON.stringify(formData) + ", " + selectedPrompt;
+      const result = await chatSession.sendMessage(finalAIPrompt);
+      const responseText = result?.response.text() || "";
 
-  const SaveInDb = async (formData: any, slug: any, aiResp: string) => {
-    const result = await db.insert(AIOutput).values({
-      formData: formData,
-      templateSlug: slug,
-      aiResponse: aiResp,
-      createdBy: user?.primaryEmailAddress?.emailAddress,
-      createdAt: moment().format("DD/MM/yyyy"),
-    });
+      setAiOutput(responseText);
 
-    console.log(result);
+      const saveResult = await saveGeneratedContent({
+        formData: JSON.stringify(formData),
+        templateSlug: selectedTemplate?.slug ?? "",
+        aiResponse: responseText,
+        createdBy: user?.primaryEmailAddress?.emailAddress ?? "",
+      });
+
+      if (!saveResult.success) {
+        toast.error(saveResult.error ?? "Failed to save content");
+      }
+    } catch (error) {
+      console.error("Failed to generate content:", error);
+      toast.error("Failed to generate content");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="p-5">
-      <Link href={"/dashboard/content"}>
+      <Link href="/dashboard/content">
         <Button variant="secondary">
-          {" "}
           <ArrowLeft /> Back
         </Button>
       </Link>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-5 ">
-        {/* FormSection  */}
+      <div className="grid grid-cols-1 gap-5 py-5 md:grid-cols-3">
         <FormSection
           selectedTemplate={selectedTemplate}
-          userFormInput={(v: any) => GenerateAIContent(v)}
+          userFormInput={generateAIContent}
           loading={loading}
         />
-        {/* OutputSection  */}
         <div className="col-span-2">
           <OutputSection aiOutput={aiOutput} />
         </div>

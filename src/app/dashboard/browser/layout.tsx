@@ -1,16 +1,12 @@
-import type { Metadata } from "next";
-import { Lexend } from "next/font/google";
-import "./globals.css";
 import { Toaster } from "@/components/browser/ui/toaster";
-
-const inter = Lexend({ subsets: ["latin"] });
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Srch",
   description: "Enhance Your Searching Experiences",
-  
   icons: {
-    icon: '/logo.png',
+    icon: "/logo.png",
   },
 };
 
@@ -21,9 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.className} overflow-x-hidden flex min-h-screen relative flex-col justify-between bg-black`}
-      >
+      <body className="relative flex min-h-screen flex-col justify-between overflow-x-hidden bg-black">
         {children}
         <Toaster />
       </body>
