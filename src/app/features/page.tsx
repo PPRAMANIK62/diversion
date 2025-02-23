@@ -80,7 +80,7 @@ const featureCards: FeatureCard[] = [
     icon: <BotMessageSquare size={50} />,
     title: "AI Chatbot ✨",
     description: "Talk , discuss and get help from AI Chatbot.",
-    href: "/dashboard/chatbot",
+    href: "/dashboard/aichatbot",
     borderColor: "border-blue-500",
   },
   {
