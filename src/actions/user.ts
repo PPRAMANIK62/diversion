@@ -1,10 +1,20 @@
+"use server";
+
 import { db } from "@/server/db";
-import { GeneratedContent, Subscriptions } from "@/server/db/schema";
+import { GeneratedContent, Subscriptions, Users } from "@/server/db/schema";
 import { sendWelcomeEmail } from "@/utils/mailtrap";
 import { desc, eq, sql } from "drizzle-orm";
-import { Users } from "lucide-react";
 
+/**
+ * Updates user points by adding the specified amount
+ * @param userId Stripe customer ID
+ * @param points Number of points to add
+ */
 export async function updateUserPoints(userId: string, points: number) {
+  if (!userId || typeof points !== "number") {
+    return { success: false, data: null, error: "Invalid input parameters" };
+  }
+
   try {
     const [updatedUser] = await db
       .update(Users)
@@ -12,33 +22,56 @@ export async function updateUserPoints(userId: string, points: number) {
       .where(eq(Users.stripeCustomerId, userId))
       .returning()
       .execute();
-    return updatedUser;
+
+    return updatedUser
+      ? { success: true, data: updatedUser }
+      : { success: false, data: null, error: "User not found" };
   } catch (error) {
     console.error("Error updating user points:", error);
-    return null;
+    return {
+      success: false,
+      data: null,
+      error: "Failed to update user points",
+    };
   }
 }
 
-export async function getUserPoints(userId: string) {
+/**
+ * Gets user points by Stripe customer ID
+ * @param userId Stripe customer ID
+ */
+export async function getUserPoints(userId: string): Promise<number> {
+  if (!userId) {
+    console.error("Invalid userId provided");
+    return 0;
+  }
+
   try {
-    console.log("Fetching points for user:", userId);
     const users = await db
-      .select({ points: Users.points, id: Users.id, email: Users.email })
+      .select({
+        points: Users.points,
+        id: Users.id,
+        email: Users.email,
+      })
       .from(Users)
       .where(eq(Users.stripeCustomerId, userId))
       .execute();
-    console.log("Fetched users:", users);
-    if (users.length === 0) {
+
+    if (!users || users.length === 0) {
       console.log("No user found with stripeCustomerId:", userId);
       return 0;
     }
-    return users[0].points || 0;
+
+    return users[0]?.points ?? 0;
   } catch (error) {
     console.error("Error fetching user points:", error);
     return 0;
   }
 }
 
+/**
+ * Creates or updates a subscription for a user
+ */
 export async function createOrUpdateSubscription(
   userId: string,
   stripeSubscriptionId: string,
@@ -47,6 +80,10 @@ export async function createOrUpdateSubscription(
   currentPeriodStart: Date,
   currentPeriodEnd: Date,
 ) {
+  if (!userId || !stripeSubscriptionId) {
+    return { success: false, data: null, error: "Invalid input parameters" };
+  }
+
   try {
     const [user] = await db
       .select({ id: Users.id })
@@ -55,59 +92,71 @@ export async function createOrUpdateSubscription(
       .limit(1);
 
     if (!user) {
-      console.error(`No user found with stripeCustomerId: ${userId}`);
-      return null;
+      return {
+        success: false,
+        data: null,
+        error: `No user found with stripeCustomerId: ${userId}`,
+      };
     }
 
-    const existingSubscription = await db
+    const [existingSubscription] = await db
       .select()
       .from(Subscriptions)
       .where(eq(Subscriptions.stripeSubscriptionId, stripeSubscriptionId))
       .limit(1);
 
-    let subscription;
-    if (existingSubscription.length > 0) {
-      // Update existing subscription
-      [subscription] = await db
-        .update(Subscriptions)
-        .set({
-          plan,
-          status,
-          currentPeriodStart,
-          currentPeriodEnd,
-        })
-        .where(eq(Subscriptions.stripeSubscriptionId, stripeSubscriptionId))
-        .returning()
-        .execute();
-    } else {
-      [subscription] = await db
-        .insert(Subscriptions)
-        .values({
-          userId: user.id,
-          stripeSubscriptionId,
-          plan,
-          status,
-          currentPeriodStart,
-          currentPeriodEnd,
-        })
-        .returning()
-        .execute();
-    }
+    const subscription = existingSubscription
+      ? await db
+          .update(Subscriptions)
+          .set({
+            plan,
+            status,
+            currentPeriodStart,
+            currentPeriodEnd,
+          })
+          .where(eq(Subscriptions.stripeSubscriptionId, stripeSubscriptionId))
+          .returning()
+          .execute()
+      : await db
+          .insert(Subscriptions)
+          .values({
+            userId: user.id,
+            stripeSubscriptionId,
+            plan,
+            status,
+            currentPeriodStart,
+            currentPeriodEnd,
+          })
+          .returning()
+          .execute();
 
-    console.log("Subscription created or updated:", subscription);
-    return subscription;
+    return {
+      success: true,
+      data: subscription[0],
+    };
   } catch (error) {
     console.error("Error creating or updating subscription:", error);
-    return null;
+    return {
+      success: false,
+      data: null,
+      error: "Failed to create or update subscription",
+    };
   }
 }
 
+/**
+ * Saves generated content to the database
+ */
 export async function saveGeneratedContent(
   userId: string,
   content: string,
   prompt: string,
   contentType: string,
 ) {
+  if (!userId || !content) {
+    return { success: false, data: null, error: "Invalid input parameters" };
+  }
+
   try {
     const [savedContent] = await db
       .insert(GeneratedContent)
@@ -119,16 +168,29 @@ export async function saveGeneratedContent(
       })
       .returning()
       .execute();
-    return savedContent;
+
+    return { success: true, data: savedContent };
   } catch (error) {
     console.error("Error saving generated content:", error);
-    return null;
+    return {
+      success: false,
+      data: null,
+      error: "Failed to save generated content",
+    };
   }
 }
 
+/**
+ * Gets user's generated content history
+ */
 export async function getGeneratedContentHistory(userId: string, limit = 10) {
+  if (!userId) {
+    console.error("Invalid userId provided");
+    return [];
+  }
+
   try {
-    const history = await db
+    return await db
       .select({
         id: GeneratedContent.id,
         content: GeneratedContent.content,
@@ -146,21 +208,25 @@ export async function getGeneratedContentHistory(userId: string, limit = 10) {
       .orderBy(desc(GeneratedContent.createdAt))
       .limit(limit)
       .execute();
-    return history;
   } catch (error) {
     console.error("Error fetching generated content history:", error);
     return [];
   }
 }
 
+/**
+ * Creates or updates a user record
+ */
 export async function createOrUpdateUser(
   clerkUserId: string,
   email: string,
   name: string,
 ) {
-  try {
-    console.log("Creating or updating user:", clerkUserId, email, name);
+  if (!clerkUserId || !email || !name) {
+    return { success: false, data: null, error: "Invalid input parameters" };
+  }
 
+  try {
     const [existingUser] = await db
       .select()
       .from(Users)
@@ -175,8 +241,8 @@ export async function createOrUpdateUser(
         .where(eq(Users.stripeCustomerId, clerkUserId))
         .returning()
         .execute();
-      console.log("Updated user:", updatedUser);
-      return updatedUser;
+
+      return { success: true, data: updatedUser };
     }
 
     const [userWithEmail] = await db
@@ -193,9 +259,9 @@ export async function createOrUpdateUser(
         .where(eq(Users.email, email))
         .returning()
         .execute();
-      console.log("Updated user:", updatedUser);
-      sendWelcomeEmail(email, name);
-      return updatedUser;
+
+      await sendWelcomeEmail(email, name);
+      return { success: true, data: updatedUser };
     }
 
     const [newUser] = await db
@@ -203,11 +269,15 @@ export async function createOrUpdateUser(
       .values({ email, name, stripeCustomerId: clerkUserId, points: 50 })
       .returning()
       .execute();
-    console.log("New user created:", newUser);
-    sendWelcomeEmail(email, name);
-    return newUser;
+
+    await sendWelcomeEmail(email, name);
+    return { success: true, data: newUser };
   } catch (error) {
     console.error("Error creating or updating user:", error);
-    return null;
+    return {
+      success: false,
+      data: null,
+      error: "Failed to create or update user",
+    };
   }
 }

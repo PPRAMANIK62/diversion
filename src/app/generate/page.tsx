@@ -1,10 +1,19 @@
 "use client";
 import React from "react";
 
-import { useState, useEffect } from "react";
+import {
+  createOrUpdateUser,
+  getGeneratedContentHistory,
+  getUserPoints,
+  saveGeneratedContent,
+  updateUserPoints,
+} from "@/actions/user";
+import { Navbar } from "@/components/Navbar";
+import { InstagramMock } from "@/components/social-mocks/InstagramMock";
+import { LinkedInMock } from "@/components/social-mocks/LinkedInMock";
+import { TwitterMock } from "@/components/social-mocks/TwitterMock";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,32 +21,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { SignInButton, useUser } from "@clerk/nextjs";
+import { GoogleGenerativeAI, type Part } from "@google/generative-ai";
 import {
-  Loader2,
-  Upload,
+  Clock,
   Copy,
-  Twitter,
   Instagram,
   Linkedin,
-  Clock,
+  Loader2,
+  Twitter,
+  Upload,
   Zap,
 } from "lucide-react";
-import { GoogleGenerativeAI, Part } from "@google/generative-ai";
-import ReactMarkdown from "react-markdown";
-import { Navbar } from "@/components/Navbar";
-import { SignInButton, useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import {
-  getUserPoints,
-  saveGeneratedContent,
-  updateUserPoints,
-  getGeneratedContentHistory,
-  createOrUpdateUser,
-} from "@/actions/actions";
-import { TwitterMock } from "@/components/social-mocks/TwitterMock";
-import { InstagramMock } from "@/components/social-mocks/InstagramMock";
-import { LinkedInMock } from "@/components/social-mocks/LinkedInMock";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
@@ -63,7 +64,7 @@ export default function GenerateContent() {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
 
-  const [contentType, setContentType] = useState(contentTypes[0].value);
+  const [contentType, setContentType] = useState(contentTypes[0]!.value);
   const [prompt, setPrompt] = useState("");
   const [generatedContent, setGeneratedContent] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +73,9 @@ export default function GenerateContent() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [selectedHistoryItem, setSelectedHistoryItem] =
     useState<HistoryItem | null>(null);
+  const [isUpdatingPoints, setIsUpdatingPoints] = useState(false);
+  const [isSavingContent, setIsSavingContent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!apiKey) {
@@ -84,29 +88,38 @@ export default function GenerateContent() {
       router.push("/");
     } else if (isSignedIn && user) {
       console.log("User loaded:", user);
-      fetchUserPoints();
-      fetchContentHistory();
+      void fetchUserPoints();
+      void fetchContentHistory();
     }
   }, [isLoaded, isSignedIn, user, router]);
 
   const fetchUserPoints = async () => {
-    if (user?.id) {
+    if (!user?.id) return;
+
+    try {
       console.log("Fetching points for user:", user.id);
       const points = await getUserPoints(user.id);
       console.log("Fetched points:", points);
       setUserPoints(points);
+
       if (points === 0) {
         console.log("User has 0 points. Attempting to create/update user.");
-        const updatedUser = await createOrUpdateUser(
+        const result = await createOrUpdateUser(
           user.id,
-          user.emailAddresses[0].emailAddress,
-          user.fullName || "",
+          user.emailAddresses[0]!.emailAddress,
+          user.fullName ?? "",
         );
-        console.log("Updated user:", updatedUser);
-        if (updatedUser) {
-          setUserPoints(updatedUser.points);
+
+        if (result.success && result.data) {
+          setUserPoints(result.data.points);
+        } else {
+          console.error("Failed to create/update user:", result.error);
+          toast.error(result.error ?? "Failed to update user");
         }
       }
+    } catch (error) {
+      console.error("Error fetching user points:", error);
+      toast.error("Failed to fetch user points");
     }
   };
 
@@ -124,7 +137,7 @@ export default function GenerateContent() {
       userPoints === null ||
       userPoints < POINTS_PER_GENERATION
     ) {
-      alert("Not enough points or API key not set.");
+      toast.error("Not enough points or API not configured");
       return;
     }
 
@@ -183,27 +196,35 @@ export default function GenerateContent() {
       setGeneratedContent(content);
 
       // Update points
-      const updatedUser = await updateUserPoints(
+      const pointsResult = await updateUserPoints(
         user.id,
         -POINTS_PER_GENERATION,
       );
-      if (updatedUser) {
-        setUserPoints(updatedUser.points);
+      if (!pointsResult.success) {
+        throw new Error(pointsResult.error ?? "Failed to update points");
       }
 
+      setUserPoints(pointsResult.data?.points ?? userPoints);
+
       // Save generated content
-      const savedContent = await saveGeneratedContent(
+      const contentResult = await saveGeneratedContent(
         user.id,
         content.join("\n\n"),
         prompt,
         contentType,
       );
 
-      if (savedContent) {
-        setHistory((prevHistory) => [savedContent, ...prevHistory]);
+      if (!contentResult.success) {
+        throw new Error(contentResult.error ?? "Failed to save content");
       }
+
+      setHistory((prev) => [contentResult.data!, ...prev]);
+      toast.success("Content generated successfully!");
     } catch (error) {
       console.error("Error generating content:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to generate content",
+      );
       setGeneratedContent(["An error occurred while generating content."]);
     } finally {
       setIsLoading(false);
@@ -222,7 +243,7 @@ export default function GenerateContent() {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+    void navigator.clipboard.writeText(text);
   };
 
   const renderContentMock = () => {
@@ -232,9 +253,9 @@ export default function GenerateContent() {
       case "twitter":
         return <TwitterMock content={generatedContent} />;
       case "instagram":
-        return <InstagramMock content={generatedContent[0]} />;
+        return <InstagramMock content={generatedContent[0]!} />;
       case "linkedin":
-        return <LinkedInMock content={generatedContent[0]} />;
+        return <LinkedInMock content={generatedContent[0]!} />;
       default:
         return null;
     }
@@ -246,21 +267,21 @@ export default function GenerateContent() {
 
   if (!isSignedIn) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
-        <div className="text-center bg-[#111111] p-8 rounded-lg shadow-lg">
-          <h1 className="text-3xl font-bold text-white mb-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a]">
+        <div className="rounded-lg bg-[#111111] p-8 text-center shadow-lg">
+          <h1 className="mb-4 text-3xl font-bold text-white">
             Welcome to CazzAI
           </h1>
-          <p className="text-gray-400 mb-6">
+          <p className="mb-6 text-gray-400">
             To start generating amazing content, please sign in or create an
             account.
           </p>
           <SignInButton mode="modal">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
+            <Button className="bg-blue-600 px-6 py-2 text-white hover:bg-blue-700">
               Sign In / Sign Up
             </Button>
           </SignInButton>
-          <p className="text-gray-500 mt-4 text-sm">
+          <p className="mt-4 text-sm text-gray-500">
             By signing in, you agree to our Terms of Service and Privacy Policy.
           </p>
         </div>
@@ -269,20 +290,39 @@ export default function GenerateContent() {
   }
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
+    if (event.target.files?.[0]) {
       setImage(event.target.files[0]);
     }
   };
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="min-h-screen bg-black text-white">
       <Navbar />
-      
-      <div className="container mx-auto px-4 mb-8 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 mt-14 lg:grid-cols-3 gap-8">
+
+      <div className="container mx-auto mb-8 px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left sidebar - History */}
-          <div className="lg:col-span-1 bg-gray-800 rounded-2xl p-6 h-[calc(100vh-12rem)] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+          <div className="h-[calc(100vh-12rem)] overflow-y-auto rounded-2xl bg-gray-800 p-6 lg:col-span-1">
+            {/* Points display */}
+            <div className="mb-8 flex items-center justify-between rounded-2xl bg-gray-800">
+              <div className="flex items-center">
+                <Zap className="mr-3 h-8 w-8 text-yellow-400" />
+                <div>
+                  <p className="text-sm text-gray-400">Available Points</p>
+                  <p className="text-2xl font-bold text-yellow-400">
+                    {userPoints ?? "Loading..."}
+                  </p>
+                </div>
+              </div>
+              <Button
+                className="rounded-full bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700"
+                asChild
+              >
+                <Link href="/pricing">Get More Points</Link>
+              </Button>
+            </div>
+
+            <div className="mb-6 flex items-center gap-4">
               <h2 className="text-2xl font-semibold text-blue-400">History</h2>
               <Clock className="h-6 w-6 text-blue-400" />
             </div>
@@ -290,10 +330,10 @@ export default function GenerateContent() {
               {history.map((item) => (
                 <div
                   key={item.id}
-                  className="p-4 bg-gray-700 rounded-xl hover:bg-gray-600 transition-colors cursor-pointer"
+                  className="cursor-pointer rounded-xl bg-gray-700 p-4 transition-colors hover:bg-gray-600"
                   onClick={() => handleHistoryItemClick(item)}
                 >
-                  <div className="flex items-center mb-2">
+                  <div className="mb-2 flex items-center">
                     {item.contentType === "twitter" && (
                       <Twitter className="mr-2 h-5 w-5 text-blue-400" />
                     )}
@@ -307,10 +347,10 @@ export default function GenerateContent() {
                       {item.contentType}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-300 truncate">
+                  <p className="truncate text-sm text-gray-300">
                     {item.prompt}
                   </p>
-                  <div className="flex items-center text-xs text-gray-400 mt-2">
+                  <div className="mt-2 flex items-center text-xs text-gray-400">
                     <Clock className="mr-1 h-3 w-3" />
                     {new Date(item.createdAt).toLocaleString()}
                   </div>
@@ -319,35 +359,76 @@ export default function GenerateContent() {
             </div>
           </div>
 
-          {/* Main content area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Points display */}
-            <div className="bg-gray-800 p-6 rounded-2xl flex items-center justify-between">
-              <div className="flex items-center">
-                <Zap className="h-8 w-8 text-yellow-400 mr-3" />
-                <div>
-                  <p className="text-sm text-gray-400">Available Points</p>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {userPoints !== null ? userPoints : "Loading..."}
-                  </p>
-                </div>
+          <div className="lg:col-span-1">
+            {/* Generated content display */}
+            {(selectedHistoryItem ?? generatedContent.length > 0) && (
+              <div className="space-y-4 rounded-2xl bg-gray-800 p-6">
+                <h2 className="text-2xl font-semibold text-blue-400">
+                  {selectedHistoryItem ? "History Item" : "Generated Content"}
+                </h2>
+                {contentType === "twitter" ? (
+                  <div className="space-y-4">
+                    {(selectedHistoryItem
+                      ? selectedHistoryItem.content.split("\n\n")
+                      : generatedContent
+                    ).map((tweet, index) => (
+                      <div
+                        key={index}
+                        className="relative rounded-xl bg-gray-700 p-4"
+                      >
+                        <ReactMarkdown className="prose-invert prose mb-2 max-w-none text-sm">
+                          {tweet}
+                        </ReactMarkdown>
+                        <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+                          <span>
+                            {tweet.length}/{MAX_TWEET_LENGTH}
+                          </span>
+                          <Button
+                            onClick={() => copyToClipboard(tweet)}
+                            className="rounded-full bg-gray-600 p-2 text-white transition-colors hover:bg-gray-500"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-gray-700 p-4">
+                    <ReactMarkdown className="prose-invert prose max-w-none text-sm">
+                      {selectedHistoryItem
+                        ? selectedHistoryItem.content
+                        : generatedContent[0]}
+                    </ReactMarkdown>
+                  </div>
+                )}
               </div>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-full transition-colors">
-                <Link href="/pricing">Get More Points</Link>
-              </Button>
-            </div>
+            )}
 
+            {/* Content preview */}
+            {generatedContent.length > 0 && (
+              <div className="rounded-2xl bg-gray-800 p-6">
+                <h2 className="mb-4 text-2xl font-semibold text-blue-400">
+                  Preview
+                </h2>
+                {renderContentMock()}
+              </div>
+            )}
+          </div>
+
+          {/* Main content area */}
+          <div className="space-y-6 lg:col-span-1">
             {/* Content generation form */}
-            <div className="bg-gray-800 p-6 rounded-2xl space-y-6">
+            <div className="space-y-6 rounded-2xl bg-gray-800 p-6">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
+                <label className="mb-2 block text-sm font-medium text-gray-300">
                   Content Type
                 </label>
                 <Select
                   onValueChange={setContentType}
                   defaultValue={contentType}
                 >
-                  <SelectTrigger className="w-full bg-gray-700 border-none rounded-xl">
+                  <SelectTrigger className="w-full rounded-xl border-none bg-gray-700">
                     <SelectValue placeholder="Select content type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -374,7 +455,7 @@ export default function GenerateContent() {
               <div>
                 <label
                   htmlFor="prompt"
-                  className="block text-sm font-medium mb-2 text-gray-300"
+                  className="mb-2 block text-sm font-medium text-gray-300"
                 >
                   Prompt
                 </label>
@@ -384,13 +465,13 @@ export default function GenerateContent() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={4}
-                  className="w-full bg-gray-700 border-none rounded-xl resize-none"
+                  className="w-full resize-none rounded-xl border-none bg-gray-700"
                 />
               </div>
 
               {contentType === "instagram" && (
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">
+                  <label className="mb-2 block text-sm font-medium text-gray-300">
                     Upload Image
                   </label>
                   <div className="flex items-center space-x-3">
@@ -403,7 +484,7 @@ export default function GenerateContent() {
                     />
                     <label
                       htmlFor="image-upload"
-                      className="cursor-pointer flex items-center justify-center px-4 py-2 bg-gray-700 rounded-xl text-sm font-medium hover:bg-gray-600 transition-colors"
+                      className="flex cursor-pointer items-center justify-center rounded-xl bg-gray-700 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-600"
                     >
                       <Upload className="mr-2 h-5 w-5" />
                       <span>Upload Image</span>
@@ -417,81 +498,38 @@ export default function GenerateContent() {
                 </div>
               )}
 
+              {error && (
+                <div className="rounded-lg bg-red-500/10 p-4 text-red-500">
+                  {error}
+                </div>
+              )}
+
               <Button
                 onClick={handleGenerate}
                 disabled={
                   isLoading ||
+                  isUpdatingPoints ||
+                  isSavingContent ||
                   !prompt ||
                   userPoints === null ||
                   userPoints < POINTS_PER_GENERATION
                 }
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition-colors"
+                className="w-full rounded-xl bg-blue-600 py-3 text-white transition-colors hover:bg-blue-700"
               >
-                {isLoading ? (
+                {isLoading || isUpdatingPoints || isSavingContent ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Generating...
+                    {isLoading
+                      ? "Generating..."
+                      : isUpdatingPoints
+                        ? "Updating points..."
+                        : "Saving content..."}
                   </>
                 ) : (
                   `Generate Content (${POINTS_PER_GENERATION} points)`
                 )}
               </Button>
             </div>
-
-            {/* Generated content display */}
-            {(selectedHistoryItem || generatedContent.length > 0) && (
-              <div className="bg-gray-800 p-6 rounded-2xl space-y-4">
-                <h2 className="text-2xl font-semibold text-blue-400">
-                  {selectedHistoryItem ? "History Item" : "Generated Content"}
-                </h2>
-                {contentType === "twitter" ? (
-                  <div className="space-y-4">
-                    {(selectedHistoryItem
-                      ? selectedHistoryItem.content.split("\n\n")
-                      : generatedContent
-                    ).map((tweet, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-700 p-4 rounded-xl relative"
-                      >
-                        <ReactMarkdown className="prose prose-invert max-w-none mb-2 text-sm">
-                          {tweet}
-                        </ReactMarkdown>
-                        <div className="flex justify-between items-center text-gray-400 text-xs mt-2">
-                          <span>
-                            {tweet.length}/{MAX_TWEET_LENGTH}
-                          </span>
-                          <Button
-                            onClick={() => copyToClipboard(tweet)}
-                            className="bg-gray-600 hover:bg-gray-500 text-white rounded-full p-2 transition-colors"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-gray-700 p-4 rounded-xl">
-                    <ReactMarkdown className="prose prose-invert max-w-none text-sm">
-                      {selectedHistoryItem
-                        ? selectedHistoryItem.content
-                        : generatedContent[0]}
-                    </ReactMarkdown>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Content preview */}
-            {generatedContent.length > 0 && (
-              <div className="bg-gray-800 p-6 rounded-2xl">
-                <h2 className="text-2xl font-semibold mb-4 text-blue-400">
-                  Preview
-                </h2>
-                {renderContentMock()}
-              </div>
-            )}
           </div>
         </div>
       </div>

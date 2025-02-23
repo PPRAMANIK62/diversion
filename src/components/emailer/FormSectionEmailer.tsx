@@ -1,14 +1,16 @@
 "use client";
-import React, { useState } from "react";
-import { TEMPLATE } from "@/components/content/TemplateListSection";
+import { type TEMPLATE } from "@/components/content/TemplateListSection";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Loader2Icon } from "lucide-react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
+
+type FormData = Record<string, string>;
 
 interface PROPS {
   selectedTemplate?: TEMPLATE;
-  userFormInput: any;
+  userFormInput: (data: FormData) => Promise<void>;
   loading: boolean;
 }
 
@@ -17,32 +19,33 @@ function FormSectioEmailer({
   userFormInput,
   loading,
 }: PROPS) {
-  const [formData, setFormData] = useState<any>();
+  const [formData, setFormData] = useState<FormData>({});
 
-  const handleInputChange = (event: any) => {
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const onSubmit = (e: any) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    userFormInput(formData);
+    void userFormInput(formData);
   };
 
   return (
-    <div className="p-5 shadow-md border rounded-lg bg-white text-black">
-      {/* @ts-expect-error */}
+    <div className="rounded-lg border bg-white p-5 text-black shadow-md">
       <form className="mt-6" onSubmit={onSubmit}>
-        {selectedTemplate?.form?.map((item, index) => (
-          <div className="my-2 flex flex-col gap-2 mb-7">
+        {selectedTemplate?.form?.map((item) => (
+          <div key={item.name} className="my-2 mb-7 flex flex-col gap-2">
             <label className="font-bold">{item.label}</label>
-            {item.field == "input" ? (
+            {item.field === "input" ? (
               <Input
                 name={item.name}
                 required={item?.required}
                 onChange={handleInputChange}
               />
-            ) : item.field == "textarea" ? (
+            ) : item.field === "textarea" ? (
               <>
                 <Textarea
                   name={item.name}
@@ -52,14 +55,14 @@ function FormSectioEmailer({
                   onChange={handleInputChange}
                 />
                 <label className="text-xs text-gray-400">
-                  Note:Max 2000 Words
+                  Note: Max 2000 Words
                 </label>
               </>
             ) : null}
           </div>
         ))}
         <Button type="submit" className="w-full py-6" disabled={loading}>
-          {loading && <Loader2Icon className="animate-spin mr-2" />}
+          {loading && <Loader2Icon className="mr-2 animate-spin" />}
           Generate Content
         </Button>
       </form>
