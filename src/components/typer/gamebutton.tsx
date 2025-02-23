@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const AIButton = () => {
+const GameButton = () => {
   return (
     <StyledWrapper>
       <button>
-        <span className="text">Search</span>
+        <span className="text">Play Globally</span>
       </button>
     </StyledWrapper>
   );
@@ -16,7 +16,7 @@ const StyledWrapper = styled.div`
     align-items: center;
     background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
     border: 0;
-    border-radius: 30px;
+    border-radius: 8px;
     box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
     box-sizing: border-box;
     color: #ffffff;
@@ -25,7 +25,7 @@ const StyledWrapper = styled.div`
     justify-content: center;
     line-height: 1em;
     max-width: 100%;
-    min-width: 130px;
+    min-width: 140px;
     padding: 3px;
     text-decoration: none;
     user-select: none;
@@ -43,10 +43,10 @@ const StyledWrapper = styled.div`
 
   button span {
     background-color: rgb(5, 6, 45);
-    padding: 13px 8px;
-    border-radius: 30px;
+    padding: 16px 20px;
+    border-radius: 6px;
     width: 100%;
-    height: 80%;
+    height: 100%;
     transition: 300ms;
   }
 
@@ -58,4 +58,4 @@ const StyledWrapper = styled.div`
     transform: scale(0.9);
   }`;
 
-export default AIButton;
+export default GameButton;

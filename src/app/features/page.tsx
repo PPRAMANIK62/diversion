@@ -167,6 +167,13 @@ const featureCards: FeatureCard[] = [
     href: "/dashboard/article",
     borderColor: "border-violet-500",
   },
+  {
+    icon: <Code className="size-10" />,
+    title: "AI Typer",
+    description: "Convert your code to other languages.",
+    href: "/dashboard/typer",
+    borderColor: "border-violet-500",
+  },
 ];
 
 const FeaturesPage = () => {
